@@ -1,8 +1,8 @@
-# metachain-core
- Official Golang implementation of Metachain - a layer 1 Proof of Work blockchain designed for decentralization, innovation, and community-driven development. This repository hosts the core codebase for the Metachain network, providing a robust and secure foundation for decentralized applications (DApps), smart contracts, and token ecosystems.
+# luxchain-core
+ Official Golang implementation of LuxChain - a layer 1 Proof of Work blockchain designed for decentralization, innovation, and community-driven development. This repository hosts the core codebase for the Metachain network, providing a robust and secure foundation for decentralized applications (DApps), smart contracts, and token ecosystems.
 
 # No uncle rewards
- We have excluded uncle rewards, so for mining uncle blocks miners will receive no coin. So the max supply will be fixed as 17M.
+ We have excluded uncle rewards, so for mining uncle blocks miners will receive no coin. So the max supply will be fixed as 33M.
 
 ## Building the source
 

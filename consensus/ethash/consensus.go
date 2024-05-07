@@ -46,8 +46,6 @@ var (
 	maxUncles                     = 5                 // Maximum number of uncles allowed in a single block
 	allowedFutureBlockTimeSeconds = int64(5)          // Max seconds from current time allowed for blocks, before they're considered future blocks
 
-	DevelopmentFundAddress = common.HexToAddress("0x184DabdA14F13e469A19c2F551dA4290071edDBb")
-
 	// calcDifficultyEip5133 is the difficulty adjustment algorithm as specified by EIP 5133.
 	// It offsets the bomb a total of 11.4M blocks.
 	// Specification EIP-5133: https://eips.ethereum.org/EIPS/eip-5133
@@ -665,7 +663,7 @@ var (
 
 func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header *types.Header, uncles []*types.Header) {
     // Select the correct block reward based on chain progression
-    MinerBlockReward := big.NewInt(7e+18) // Initial block reward
+    MinerBlockReward := big.NewInt(5e+18) // Initial block reward
     blockReward := MinerBlockReward
 
     // Calculate the number of reductions that have occurred
@@ -679,13 +677,6 @@ func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header 
     for i := new(big.Int); i.Cmp(numReductions) < 0; i.Add(i, big.NewInt(1)) {
         blockReward.Mul(blockReward, reductionFactor)
         blockReward.Div(blockReward, big.NewInt(100))
-    }
-
-    // Foundation Fee
-    // Check if the block height is less than 1,000,001
-    if header.Number.Cmp(big.NewInt(1000001)) < 0 {
-        DevelopmentBlockReward := big.NewInt(3e+18)
-        state.AddBalance(DevelopmentFundAddress, DevelopmentBlockReward)
     }
 
     // Accumulate the rewards for the miner
