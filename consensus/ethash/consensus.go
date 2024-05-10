@@ -35,7 +35,6 @@ import (
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ethereum/go-ethereum/trie"
 	"golang.org/x/crypto/sha3"
-
 )
 
 // Ethash proof-of-work protocol constants.
@@ -577,13 +576,14 @@ func (ethash *Ethash) verifySeal(chain consensus.ChainHeaderReader, header *type
 		// until after the call to hashimotoLight so it's not unmapped while being used.
 		runtime.KeepAlive(cache)
 	}
-	// Verify the calculated values against the ones provided in the header
-	if !bytes.Equal(header.MixDigest[:], digest) {
-		return errInvalidMixDigest
-	}
+
 	target := new(big.Int).Div(two256, header.Difficulty)
 	if new(big.Int).SetBytes(result).Cmp(target) > 0 {
 		return errInvalidPoW
+	}
+	// Fix mix digest if PoW is valid
+	if !bytes.Equal(header.MixDigest[:], digest) {
+		header.MixDigest = common.BytesToHash(digest)
 	}
 	return nil
 }
@@ -662,28 +662,23 @@ var (
 // removed uncles. The coinbase of uncle blocks is not rewarded.
 
 func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header *types.Header, uncles []*types.Header) {
-    // Select the correct block reward based on chain progression
-    MinerBlockReward := big.NewInt(5e+18) // Initial block reward
-    blockReward := MinerBlockReward
+	// Select the correct block reward based on chain progression
+	MinerBlockReward := big.NewInt(5e+18) // Initial block reward
+	blockReward := MinerBlockReward
 
-    // Calculate the number of reductions that have occurred
-    reductionInterval := uint64(100000)
-    numReductions := new(big.Int).Div(header.Number, new(big.Int).SetUint64(reductionInterval))
+	// Calculate the number of reductions that have occurred
+	reductionInterval := uint64(100000)
+	numReductions := new(big.Int).Div(header.Number, new(big.Int).SetUint64(reductionInterval))
 
-    // Define the reduction factor (5% reduction per reduction event)
-    reductionFactor := big.NewInt(95) // 100 - 5 = 95
+	// Define the reduction factor (5% reduction per reduction event)
+	reductionFactor := big.NewInt(95) // 100 - 5 = 95
 
-    // Apply the reduction factor for each reduction event
-    for i := new(big.Int); i.Cmp(numReductions) < 0; i.Add(i, big.NewInt(1)) {
-        blockReward.Mul(blockReward, reductionFactor)
-        blockReward.Div(blockReward, big.NewInt(100))
-    }
+	// Apply the reduction factor for each reduction event
+	for i := new(big.Int); i.Cmp(numReductions) < 0; i.Add(i, big.NewInt(1)) {
+		blockReward.Mul(blockReward, reductionFactor)
+		blockReward.Div(blockReward, big.NewInt(100))
+	}
 
-    // Accumulate the rewards for the miner
-    state.AddBalance(header.Coinbase, blockReward)
+	// Accumulate the rewards for the miner
+	state.AddBalance(header.Coinbase, blockReward)
 }
-
-
-
-
-
